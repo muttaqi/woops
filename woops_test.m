@@ -1,6 +1,6 @@
 #!wolframscript
-Import["woops.wls"]
-Import["testing.wls"]
+Import["woops.m"]
+Import["testing.m"]
 
 c := Class[
     <|
