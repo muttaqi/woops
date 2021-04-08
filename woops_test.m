@@ -23,6 +23,7 @@ c := Class[
 o := New[c, <|"a"->1|>]
 
 Assert[o["a"] == 1]
+Assert[o["add1" <|x->2|>] == 3]
 Assert[o["add1ToA", <||>] == 2]
 
 o = o["a", 3]
