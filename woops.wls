@@ -35,3 +35,11 @@ Instance[tuple_][name_, args_Association] := (
         Throw["Unknown function " <> name]
     ]
 )
+
+Instance[tuple_][name_, val_] := (
+    If[
+        KeyExistsQ[tuple[[1]], name],
+        Instance[{<|tuple[[1]], name -> val|>, tuple[[2]]}],
+        Throw["Unknown function " <> name]
+    ]
+)

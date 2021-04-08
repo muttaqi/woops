@@ -1,5 +1,6 @@
 #!wolframscript
 Import["woops.wls"]
+Import["testing.wls"]
 
 c := Class[
     <|
@@ -18,8 +19,8 @@ c := Class[
 
 o := New[c, <|"a"->1|>]
 
-Print[o]
+Assert[o["a"], 1]
+Assert[o["add1ToA", <||>], 2]
 
-v := o["a"]
-Print[v]
-Print[o["add1ToA", <||>]]
+o = o["a", 3]
+Assert[o["a"], 3]
