@@ -31,7 +31,7 @@ Instance[tuple_][name_] := (
 Instance[tuple_][name_, args_Association] := (
     If[
         KeyExistsQ[tuple[[2]], name],
-        tuple[[2]][name][<|args, "this" -> tuple[[1]]|>],
+        tuple[[2]][name][<|args, "this" -> Instance[tuple]|>],
         Throw["Unknown function " <> name]
     ]
 )
