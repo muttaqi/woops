@@ -1,5 +1,6 @@
 #!wolframscript
 Import["woops.m"]
+On[Assert]
 
 c := Class[
     <|
@@ -10,12 +11,24 @@ c := Class[
             {x},
             x + 1
         ],
+        "_private" -> Function[
+            {x},
+            x + 1
+        ],
         "add1ToA" -> Function[
-            #this["a"] + 1
+            {this},
+            this["a"] + 1
         ],
         "mutateAndReturnTrue" -> Function[
-            out = #this["a", 4];
-            {out, True}
+            {this},
+            (
+                out = this["a", 4];
+                {out["__ToInstance__"], True}
+            )
+        ],
+        "callPrivate" -> Function[
+            {this},
+            this["_private", {2}]
         ]
     |>
 ]
@@ -23,13 +36,16 @@ c := Class[
 o := New[c, <|"a"->1|>]
 
 Assert[o["a"] == 1]
-Assert[o["add1" <|x->2|>] == 3]
-Assert[o["add1ToA", <||>] == 2]
+Assert[o["add1", {2}] == 3]
+Assert[o["add1ToA", {}] == 2]
 
 o = o["a", 3]
 Assert[o["a"] == 3]
 
-res = o["mutateAndReturnTrue", <||>]
+res = o["mutateAndReturnTrue", {}]
 Assert[res[[2]]]
 o = res[[1]]
 Assert[o["a"] == 4]
+
+Assert[Catch[o["_private", {4}]] == "Unknown function _private"]
+Assert[o["callPrivate", {}] == 3]
