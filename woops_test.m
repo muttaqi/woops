@@ -49,3 +49,36 @@ Assert[o["a"] == 4]
 
 Assert[Catch[o["_private", {4}]] == "Unknown function _private"]
 Assert[o["callPrivate", {}] == 3]
+
+subC := Extend[c,
+    <|
+        "a" -> 2,
+        "b" -> 5
+    |>,
+    <|
+        "mutateAndReturnTrue" -> Function[
+            {this},
+            (
+                out = this["a", 4];
+                {out["__ToInstance__"], False}
+            )
+        ],
+        "callSuperMutateAndReturnTrue" -> Function[
+            {this},
+            (
+                this["_super"]["mutateAndReturnTrue", {}]
+            )
+        ]
+    |>
+]
+
+subO := New[subC]
+
+Assert[subO["a"] == 2]
+Assert[subO["b"] == 5]
+
+res := subO["mutateAndReturnTrue", {}]
+Assert[Not[res[[2]]]]
+
+res = subO["callSuperMutateAndReturnTrue", {}]
+Assert[res[[2]]]

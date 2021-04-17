@@ -3,7 +3,39 @@
 (* Class tuple *)
 Class[vars_, funcs_] := {vars, funcs}
 
+(* Sub-class tuple *)
+Extend[tuple_, vars_, funcs_] := (
+    outVars := tuple[[1]];
+    outFuncs := tuple[[2]];
+
+    inVars = <|vars, "_super" -> {<||>, outFuncs}|>;
+
+    Do[
+        (
+            outVars = <|outVars, varName -> inVars@varName|>;
+        ),
+        {
+            varName,
+            Keys[inVars]
+        }
+    ]; 
+
+    Do[
+        (
+            outFuncs = <|outFuncs, funcName -> funcs@funcName|>;
+        ),
+        {
+            funcName,
+            Keys[funcs]
+        }
+    ]; 
+
+    {outVars, outFuncs}
+)
+
 (* Class instantiation *)
+New[default_] := Instance[default]
+
 New[default_, vars_] := (
     outVars := default[[1]];
     Do[
@@ -60,7 +92,11 @@ MetaInstance[tuple_][name_] := (
         Instance[tuple],
         If[
             KeyExistsQ[tuple[[1]], name],
-            tuple[[1]][name],
+            If[
+                name == "_super",
+                LazySuperInstance[tuple[[1]][name], tuple[[1]]],
+                tuple[[1]][name]
+            ],
             Throw["Unknown variable " <> name]
         ]
     ]
@@ -79,11 +115,11 @@ MetaInstance[tuple_][name_, args_List] := (
 Instance[tuple_][name_, val_] := (
     If[
         StringTake[name, 1] == "_",
-        Throw["Unknown function " <> name],
+        Throw["Unknown variable " <> name],
         If[
             KeyExistsQ[tuple[[1]], name],
             Instance[{<|tuple[[1]], name -> val|>, tuple[[2]]}],
-            Throw["Unknown function " <> name]
+            Throw["Unknown variable " <> name]
         ]
     ]
 )
@@ -93,6 +129,11 @@ MetaInstance[tuple_][name_, val_] := (
     If[
         KeyExistsQ[tuple[[1]], name],
         MetaInstance[{<|tuple[[1]], name -> val|>, tuple[[2]]}],
-        Throw["Unknown function " <> name]
+        Throw["Unknown variable " <> name]
     ]
+)
+
+(* Inject subclass variables lazily into super class instance *)
+LazySuperInstance[tuple_, subVars_] := (
+    Instance[{KeyDrop[subVars, "_super"], tuple[[2]]}]
 )
